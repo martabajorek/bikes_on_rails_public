@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 import httpx
 
@@ -50,9 +51,79 @@ def send_connections_query() -> dict:
         return response.json()
 
 
+def contains_value(value: Any, expected: Any) -> bool:
+    if value == expected:
+        return True
+
+    if isinstance(value, str) and value == str(expected):
+        return True
+
+    if isinstance(value, list):
+        return any(contains_value(item, expected) for item in value)
+
+    if isinstance(value, dict):
+        return any(contains_value(item, expected) for item in value.values())
+
+    return False
+
+
+def get_first(train: dict[str, Any], keys: list[str]) -> Any:
+    for key in keys:
+        if key in train:
+            return train[key]
+
+    return None
+
+
+def collect_trains(data: Any) -> list[dict[str, Any]]:
+    trains = []
+
+    if isinstance(data, list):
+        for item in data:
+            trains.extend(collect_trains(item))
+
+    if isinstance(data, dict):
+        train_number = get_first(data, ["nrPociagu", "nrPociągu", "numerPociagu"])
+        if train_number is not None:
+            trains.append(data)
+
+        for value in data.values():
+            trains.extend(collect_trains(value))
+
+    return trains
+
+
+def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
+    trains = collect_trains(result)
+    trains_with_bike_places = [
+        train for train in trains if contains_value(train.get("typyMiejsc"), 24)
+    ]
+
+    return {
+        "number_of_trains": len(trains),
+        "number_of_trains_with_bike_places": len(trains_with_bike_places),
+        "trains_with_bike_places": [
+            {
+                "nrPociągu": get_first(
+                    train, ["nrPociagu", "nrPociągu", "numerPociagu"]
+                ),
+                "kategoriaPociągu": get_first(
+                    train,
+                    ["kategoriaPociagu", "kategoriaPociągu", "kategoriaPociÄ…gu"],
+                ),
+                "dataWyjazdu": train.get("dataWyjazdu"),
+                "dataPrzyjazdu": train.get("dataPrzyjazdu"),
+                "czasJazdy": train.get("czasJazdy"),
+            }
+            for train in trains_with_bike_places
+        ],
+    }
+
+
 def main() -> None:
     result = send_connections_query()
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    summary = parse_connections_result(result)
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
