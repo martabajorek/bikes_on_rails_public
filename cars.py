@@ -33,6 +33,20 @@ def send_cars_query() -> Any:
         return response.text
 
 
+def find_bike_cars(data: dict[str, Any]) -> list[dict[str, str | None]]:
+    car_amenities = data.get("wagonyUdogodnienia", {})
+    car_schemas = data.get("wagonySchemat", {})
+
+    return [
+        {
+            "wagon": car_number,
+            "wagonySchemat": car_schemas.get(car_number),
+        }
+        for car_number, amenities in car_amenities.items()
+        if "309" in amenities
+    ]
+
+
 def main() -> None:
     result = send_cars_query()
     print(json.dumps(result, ensure_ascii=False, indent=2))
