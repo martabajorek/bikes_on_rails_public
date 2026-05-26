@@ -1,8 +1,10 @@
-import httpx
 import xml.etree.ElementTree as ET
+
+from api import send_query_get
 
 
 SVG_NAMESPACE = "{http://www.w3.org/2000/svg}"
+SEATS_ENDPOINT = "https://api-gateway.intercity.pl/grm/wagon/svg/wbnet/IC/1814/13/2124,2141,MIXED/202606061101/202606061440/5100136/5100023"
 
 
 def extract_bike_places(svg_text: str) -> list[dict[str, str]]:
@@ -30,28 +32,9 @@ def extract_bike_places(svg_text: str) -> list[dict[str, str]]:
 
 
 def main() -> None:
-    address = "https://api-gateway.intercity.pl/grm/wagon/svg/wbnet/IC/1814/13/2124,2141,MIXED/202606061101/202606061440/5100136/5100023"
+    svg_text = send_query_get(SEATS_ENDPOINT)
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/125.0.0.0 Safari/537.36"
-        ),
-        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Accept-Language": "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Referer": "https://www.intercity.pl/",
-        "Origin": "https://www.intercity.pl",
-        "Sec-Fetch-Dest": "image",
-        "Sec-Fetch-Mode": "no-cors",
-        "Sec-Fetch-Site": "same-site",
-    }
-
-    with httpx.Client(http2=True, headers=headers, timeout=20) as client:
-        response = client.get(address)
-        response.raise_for_status()
-
-    bike_places = extract_bike_places(response.text)
+    bike_places = extract_bike_places(svg_text)
 
     if not bike_places:
         print("No bicycle places found.")
