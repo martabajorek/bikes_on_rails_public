@@ -12,7 +12,7 @@ def send_connections_query() -> dict:
         "wersja": "1.5.6_desktop",
         "url": "https://ebilet.intercity.pl/wyszukiwanie?dwyj=2026-06-05&swyj=242&sprzy=41&time=01%3A50&przy=0&sprzez=&ticket100=1010%3B1010&ticket50=&polbez=1&ahan=FB",
         "dataWyjazdu": "2026-06-05 00:00:00",
-        "dataPrzyjazdu": "2026-06-05 23:59:59",
+        # "dataPrzyjazdu": "2026-06-05 23:59:59",
         "stacjaWyjazdu": 242,
         "stacjaPrzyjazdu": 41,
         "stacjePrzez": [],
