@@ -10,97 +10,41 @@ CONNECTIONS_PAYLOAD = {
     "wersja": "1.5.6_desktop",
     "url": "https://ebilet.intercity.pl/wyszukiwanie?dwyj=2026-06-05&swyj=242&sprzy=41&time=01%3A50&przy=0&sprzez=&ticket100=1010%3B1010&ticket50=&polbez=1&ahan=FB",
     "dataWyjazdu": "2026-06-05 00:00:00",
-    # "dataPrzyjazdu": "2026-06-05 23:59:59",
     "stacjaWyjazdu": 242,
     "stacjaPrzyjazdu": 41,
     "stacjePrzez": [],
-    "polaczeniaBezposrednie": 0,
-    "polaczeniaNajszybsze": 0,
-    "liczbaPolaczen": 0,
-    "czasNaPrzesiadkeMin": 5,
-    "czasNaPrzesiadkeMax": 1440,
-    "liczbaPrzesiadekMax": 2,
-    "kategoriePociagow": [],
-    "kodyPrzewoznikow": [],
-    "rodzajeMiejsc": [],
-    "typyMiejsc": [],
-    "braille": 0,
-    "atrybutyHandlowe": [],
     "urzadzenieNr": 956,
 }
 
-
-def contains_value(value: Any, expected: Any) -> bool:
-    if value == expected:
-        return True
-
-    if isinstance(value, str) and value == str(expected):
-        return True
-
-    if isinstance(value, list):
-        return any(contains_value(item, expected) for item in value)
-
-    if isinstance(value, dict):
-        return any(contains_value(item, expected) for item in value.values())
-
-    return False
-
-
-def get_first(train: dict[str, Any], keys: list[str]) -> Any:
-    for key in keys:
-        if key in train:
-            return train[key]
-
-    return None
-
-
-def collect_trains(data: Any) -> list[dict[str, Any]]:
-    trains = []
-
-    if isinstance(data, list):
-        for item in data:
-            trains.extend(collect_trains(item))
-
-    if isinstance(data, dict):
-        train_number = get_first(data, ["nrPociagu", "nrPociągu", "numerPociagu"])
-        if train_number is not None:
-            trains.append(data)
-
-        for value in data.values():
-            trains.extend(collect_trains(value))
-
-    return trains
-
-
 def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
-    trains = collect_trains(result)
-    trains_with_bike_places = [
-        train for train in trains if contains_value(train.get("typyMiejsc"), 24)
-    ]
+    connections = result["polaczenia"]
+    bike_trains: list[dict[str, Any]] = []
+
+    for connection in connections:
+        train = connection["pociagi"][0]
+        if 24 not in train.get("typyMiejsc", []):
+            continue
+
+        bike_trains.append(
+            {
+                "nrPociagu": train.get("nrPociagu"),
+                "kategoriaPociagu": train.get("kategoriaPociagu"),
+                "nazwaPociagu": train.get("nazwaPociagu"),
+                "dataWyjazdu": connection.get("dataWyjazdu", train.get("dataWyjazdu")),
+                "dataPrzyjazdu": connection.get("dataPrzyjazdu", train.get("dataPrzyjazdu")),
+                "czasJazdy": connection.get("czasJazdy", train.get("czasJazdy")),
+            }
+        )
 
     return {
-        "number_of_trains": len(trains),
-        "number_of_trains_with_bike_places": len(trains_with_bike_places),
-        "trains_with_bike_places": [
-            {
-                "nrPociągu": get_first(
-                    train, ["nrPociagu", "nrPociągu", "numerPociagu"]
-                ),
-                "kategoriaPociągu": get_first(
-                    train,
-                    ["kategoriaPociagu", "kategoriaPociągu", "kategoriaPociÄ…gu"],
-                ),
-                "dataWyjazdu": train.get("dataWyjazdu"),
-                "dataPrzyjazdu": train.get("dataPrzyjazdu"),
-                "czasJazdy": train.get("czasJazdy"),
-            }
-            for train in trains_with_bike_places
-        ],
+        "number_of_connections": len(connections),
+        "number_of_bike_trains": len(bike_trains),
+        "bike_trains": bike_trains,
     }
 
 
 def main() -> None:
-    result = send_query_post(endpoint=CONNECTIONS_ENDPOINT,json=CONNECTIONS_PAYLOAD)
+    result = send_query_post(endpoint=CONNECTIONS_ENDPOINT, json=CONNECTIONS_PAYLOAD)
     summary = parse_connections_result(result)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
