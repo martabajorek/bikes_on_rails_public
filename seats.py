@@ -53,30 +53,30 @@ def extract_bike_places(svg_text: str) -> list[dict[str, str]]:
     return bike_places
 
 
-def main() -> None:
-    svg_text = send_query_get(
-        build_seats_endpoint(
-            {
-                "kategoriaPociagu": "IC",
-                "nrPociagu": 1814,
-                "dataWyjazdu": "2026-06-06 11:01:00",
-                "dataPrzyjazdu": "2026-06-06 14:40:00",
-            },
-            {"wagon": 13, "wagonySchemat": "MIXED"},
-            {"kodEPA": 5100136},
-            {"kodEPA": 5100023},
-        )
-    )
-
-    bike_places = extract_bike_places(svg_text)
-
-    if not bike_places:
-        print("No bicycle places found.")
-        return
-
-    for place in bike_places:
-        print(f"Miejsce {place['place_number']}: {place['status']}")
-
-
-if __name__ == "__main__":
-    main()
+# def main() -> None:
+#     svg_text = send_query_get(
+#         build_seats_endpoint(
+#             {
+#                 "kategoriaPociagu": "IC",
+#                 "nrPociagu": 1814,
+#                 "dataWyjazdu": "2026-06-06 11:01:00",
+#                 "dataPrzyjazdu": "2026-06-06 14:40:00",
+#             },
+#             {"wagon": 13, "wagonySchemat": "MIXED"},
+#             {"kodEPA": 5100136},
+#             {"kodEPA": 5100023},
+#         )
+#     )
+#
+#     bike_places = extract_bike_places(svg_text)
+#
+#     if not bike_places:
+#         print("No bicycle places found.")
+#         return
+#
+#     for place in bike_places:
+#         print(f"Miejsce {place['place_number']}: {place['status']}")
+#
+#
+# if __name__ == "__main__":
+#     main()

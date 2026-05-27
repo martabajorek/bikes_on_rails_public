@@ -66,12 +66,12 @@ def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def main() -> None:
-    payload = build_connections_payload(date(2026, 6, 5), {"kod": 242}, {"kod": 41})
-    result = send_query_post(endpoint=CONNECTIONS_ENDPOINT, json=payload)
-    summary = parse_connections_result(result)
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-
-
-if __name__ == "__main__":
-    main()
+# def main() -> None:
+#     payload = build_connections_payload(date(2026, 6, 5), {"kod": 242}, {"kod": 41})
+#     result = send_query_post(endpoint=CONNECTIONS_ENDPOINT, json=payload)
+#     summary = parse_connections_result(result)
+#     print(json.dumps(summary, ensure_ascii=False, indent=2))
+#
+#
+# if __name__ == "__main__":
+#     main()

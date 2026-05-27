@@ -37,24 +37,23 @@ def find_bike_cars(data: dict[str, Any]) -> list[dict[str, str | None]]:
     ]
 
 
-def main() -> None:
-
-    result = send_query_get(
-        build_cars_endpoint(
-            {
-                "kategoriaPociagu": "TLK",
-                "nrPociagu": 38170,
-                "dataPrzyjazdu": "2026-06-05 06:23:00",
-                "dataWyjazdu": "2026-06-05 02:20:00",
-            },
-            {"kodEPA": 5100136},
-            {"kodEPA": 5100023},
-        )
-    )
-
-    cars = find_bike_cars(result)
-    print(json.dumps(cars, ensure_ascii=False, indent=2))
-
-
-if __name__ == "__main__":
-    main()
+# def main() -> None:
+#     result = send_query_get(
+#         build_cars_endpoint(
+#             {
+#                 "kategoriaPociagu": "TLK",
+#                 "nrPociagu": 38170,
+#                 "dataPrzyjazdu": "2026-06-05 06:23:00",
+#                 "dataWyjazdu": "2026-06-05 02:20:00",
+#             },
+#             {"kodEPA": 5100136},
+#             {"kodEPA": 5100023},
+#         )
+#     )
+#
+#     cars = find_bike_cars(result)
+#     print(json.dumps(cars, ensure_ascii=False, indent=2))
+#
+#
+# if __name__ == "__main__":
+#     main()
