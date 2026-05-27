@@ -4,6 +4,8 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from connections import build_connections_payload
+
 
 STATIONS_PATH = Path("stations_parsed.csv")
 
@@ -58,6 +60,10 @@ def main() -> None:
             "select_date": select_date.isoformat(),
         }
     )
+
+    if station_from and station_to:
+        st.subheader("connections payload")
+        st.json(build_connections_payload(select_date, station_from, station_to))
 
 
 if __name__ == "__main__":

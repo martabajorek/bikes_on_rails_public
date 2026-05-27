@@ -1,20 +1,43 @@
 import json
+from datetime import date
 from typing import Any
 
 from api import send_query_post
 
 CONNECTIONS_ENDPOINT = "https://api-gateway.intercity.pl/server/public/endpoint/Pociagi"
 
-CONNECTIONS_PAYLOAD = {
-    "metoda": "wyszukajPolaczenia",
-    "wersja": "1.5.6_desktop",
-    "url": "https://ebilet.intercity.pl/wyszukiwanie?dwyj=2026-06-05&swyj=242&sprzy=41&time=01%3A50&przy=0&sprzez=&ticket100=1010%3B1010&ticket50=&polbez=1&ahan=FB",
-    "dataWyjazdu": "2026-06-05 00:00:00",
-    "stacjaWyjazdu": 242,
-    "stacjaPrzyjazdu": 41,
-    "stacjePrzez": [],
-    "urzadzenieNr": 956,
-}
+
+def build_connections_payload(
+    selected_date: date,
+    station_from: dict[str, Any],
+    station_to: dict[str, Any],
+) -> dict[str, Any]:
+    date_text = selected_date.isoformat()
+    station_from_code = station_from["kod"]
+    station_to_code = station_to["kod"]
+
+    return {
+        "metoda": "wyszukajPolaczenia",
+        "wersja": "1.5.6_desktop",
+        "url": (
+            "https://ebilet.intercity.pl/wyszukiwanie?"
+            f"dwyj={date_text}"
+            f"&swyj={station_from_code}"
+            f"&sprzy={station_to_code}"
+            "&time=01%3A50"
+            "&przy=0"
+            "&sprzez="
+            "&ticket100=1010%3B1010"
+            "&ticket50="
+            "&polbez=1"
+            "&ahan=FB"
+        ),
+        "dataWyjazdu": f"{date_text} 00:00:00",
+        "stacjaWyjazdu": station_from_code,
+        "stacjaPrzyjazdu": station_to_code,
+        "stacjePrzez": [],
+        "urzadzenieNr": 956,
+    }
 
 def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
     connections = result["polaczenia"]
@@ -44,7 +67,8 @@ def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> None:
-    result = send_query_post(endpoint=CONNECTIONS_ENDPOINT, json=CONNECTIONS_PAYLOAD)
+    payload = build_connections_payload(date(2026, 6, 5), {"kod": 242}, {"kod": 41})
+    result = send_query_post(endpoint=CONNECTIONS_ENDPOINT, json=payload)
     summary = parse_connections_result(result)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
