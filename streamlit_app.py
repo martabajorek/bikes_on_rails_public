@@ -52,6 +52,8 @@ def main() -> None:
         min_value=date.today(),
     )
 
+    run_clicked = st.button("Run")
+
     st.divider()
     st.write(
         {
@@ -61,7 +63,7 @@ def main() -> None:
         }
     )
 
-    if station_from and station_to:
+    if run_clicked and station_from and station_to:
         st.subheader("connections payload")
         st.json(build_connections_payload(select_date, station_from, station_to))
 
