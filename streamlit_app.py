@@ -44,7 +44,11 @@ def main() -> None:
         placeholder="Select station",
     )
 
-    select_date = st.date_input("select_date", value=date.today())
+    select_date = st.date_input(
+        "select_date",
+        value=date.today(),
+        min_value=date.today(),
+    )
 
     st.divider()
     st.write(
