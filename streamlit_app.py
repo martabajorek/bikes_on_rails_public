@@ -101,13 +101,14 @@ def render_connection_status(
 def render_seat_table(df: pd.DataFrame) -> str:
     rows = []
 
-    for _, row in df.iterrows():
+    for index, row in df.iterrows():
         is_available = row["summary"] != "brak wolnych miejsc na rower"
         background = "background-color: #dff3df;" if is_available else ""
         summary_html = escape(str(row["summary"])).replace("\n", "<br>")
 
         rows.append(
             "<tr style='{background}'>"
+            "<td>{index}</td>"
             "<td>{nr}</td>"
             "<td>{kat}</td>"
             "<td>{name}</td>"
@@ -117,6 +118,7 @@ def render_seat_table(df: pd.DataFrame) -> str:
             "<td>{summary}</td>"
             "</tr>".format(
                 background=background,
+                index=index + 1,
                 nr=escape(str(row["nrPociagu"])),
                 kat=escape(str(row["kategoriaPociagu"])),
                 name=escape(str(row["nazwaPociagu"])),
@@ -131,6 +133,7 @@ def render_seat_table(df: pd.DataFrame) -> str:
         "<table style='width:100%; border-collapse: collapse;'>"
         "<thead>"
         "<tr>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>index</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>nrPociagu</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>kategoriaPociagu</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>nazwaPociagu</th>"
