@@ -198,7 +198,10 @@ def main() -> None:
             f"number of connections: {parsed_connections['number_of_connections']}"
         )
         st.write(
-            f"number of bike trains: {parsed_connections['number_of_bike_trains']}"
+            f"number of direct connections: {parsed_connections['number_of_direct_connections']}"
+        )
+        st.write(
+            f"number of direct bike trains: {parsed_connections['number_of_direct_bike_trains']}"
         )
         status_placeholder = st.empty()
         total_connections = len(parsed_connections["bike_trains"])

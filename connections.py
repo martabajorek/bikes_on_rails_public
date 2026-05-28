@@ -41,9 +41,10 @@ def build_connections_payload(
 
 def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
     connections = result["polaczenia"]
+    direct_connections = [connection for connection in connections if len(connection["pociagi"]) == 1]
     bike_trains: list[dict[str, Any]] = []
 
-    for connection in connections:
+    for connection in direct_connections:
         train = connection["pociagi"][0]
         if 24 not in train.get("typyMiejsc", []):
             continue
@@ -61,7 +62,8 @@ def parse_connections_result(result: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "number_of_connections": len(connections),
-        "number_of_bike_trains": len(bike_trains),
+        "number_of_direct_connections": len(direct_connections),
+        "number_of_direct_bike_trains": len(bike_trains),
         "bike_trains": bike_trains,
     }
 
