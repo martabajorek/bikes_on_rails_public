@@ -34,10 +34,14 @@ def build_seat_summaries(
     parsed_connections: dict[str, object],
     station_from: dict[str, object],
     station_to: dict[str, object],
+    status_placeholder: st.delta_generator.DeltaGenerator,
 ) -> list[dict[str, object]]:
     seat_summaries: list[dict[str, object]] = []
+    connections = parsed_connections["bike_trains"]
+    total_connections = len(connections)
 
-    for connection in parsed_connections["bike_trains"]:
+    for index, connection in enumerate(connections, start=1):
+        status_placeholder.write(f"checking connection {index} of {total_connections}")
         cars_url = build_cars_endpoint(connection, station_from, station_to)
         cars_result = send_query_get(cars_url)
         bike_cars = find_bike_cars(cars_result)
@@ -124,7 +128,6 @@ def main() -> None:
         json=build_connections_payload(select_date, station_from, station_to),
     )
     parsed_connections = parse_connections_result(connections_result)
-    seat_summaries = build_seat_summaries(parsed_connections, station_from, station_to)
 
     st.subheader("connections")
     st.write(f"number of connections: {parsed_connections['number_of_connections']}")
@@ -137,8 +140,13 @@ def main() -> None:
     )
 
     st.subheader("seats")
+    status_placeholder = st.empty()
+    seat_summaries = build_seat_summaries(
+        parsed_connections, station_from, station_to, status_placeholder
+    )
     seat_df = pd.DataFrame(seat_summaries)
     st.dataframe(style_seat_summaries(seat_df), use_container_width=True)
+    status_placeholder.empty()
 
 
 if __name__ == "__main__":
