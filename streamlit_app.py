@@ -107,7 +107,14 @@ def main() -> None:
     seat_rows = build_seat_rows(parsed_connections, station_from, station_to)
 
     st.subheader("connections")
-    st.json(parsed_connections)
+    st.write(f"number of connections: {parsed_connections['number_of_connections']}")
+    st.write(
+        f"number of bike trains: {parsed_connections['number_of_bike_trains']}"
+    )
+    st.dataframe(
+        pd.DataFrame(parsed_connections["bike_trains"]),
+        use_container_width=True,
+    )
 
     st.subheader("seats")
     if seat_rows:
