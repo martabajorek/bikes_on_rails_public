@@ -16,6 +16,7 @@ from seats import build_seats_endpoint, extract_bike_places
 
 
 STATIONS_PATH = Path("stations_parsed.csv")
+NOT_FOUND_SUMMARY = "informacja niedostepna sprawdz na intercity.pl"
 
 
 @st.cache_data
@@ -45,12 +46,31 @@ def build_seat_summaries(
         status_placeholder.markdown(f"**checking connection {index} of {total_connections}**")
         cars_url = build_cars_endpoint(connection, station_from, station_to)
         cars_result = send_query_get(cars_url)
+        if cars_result is None:
+            seat_summaries.append(
+                {
+                    "nrPociagu": connection["nrPociagu"],
+                    "kategoriaPociagu": connection["kategoriaPociagu"],
+                    "nazwaPociagu": connection["nazwaPociagu"],
+                    "dataWyjazdu": connection["dataWyjazdu"],
+                    "dataPrzyjazdu": connection["dataPrzyjazdu"],
+                    "czasJazdy": connection["czasJazdy"],
+                    "summary": NOT_FOUND_SUMMARY,
+                }
+            )
+            continue
+
         bike_cars = find_bike_cars(cars_result)
         wagon_counts: dict[str, int] = {}
+        unavailable = False
 
         for car in bike_cars:
             seats_url = build_seats_endpoint(connection, car, station_from, station_to)
             svg_text = send_query_get(seats_url)
+            if svg_text is None:
+                unavailable = True
+                break
+
             bike_places = extract_bike_places(svg_text)
 
             if bike_places:
@@ -58,7 +78,9 @@ def build_seat_summaries(
                     bike_places
                 )
 
-        if wagon_counts:
+        if unavailable:
+            summary_text = NOT_FOUND_SUMMARY
+        elif wagon_counts:
             summary_text = "\n".join(
                 f"{count} {'miejsce' if count == 1 else 'miejsca'} w wagonie {wagon}"
                 for wagon, count in sorted(wagon_counts.items())
