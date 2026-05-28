@@ -58,7 +58,7 @@ def build_seat_summaries(
                 )
 
         if wagon_counts:
-            summary_text = ", ".join(
+            summary_text = "\n".join(
                 f"{count} {'miejsce' if count == 1 else 'miejsca'} w wagonie {wagon}"
                 for wagon, count in sorted(wagon_counts.items())
             )
