@@ -42,7 +42,7 @@ def build_seat_summaries(
     total_connections = len(connections)
 
     for index, connection in enumerate(connections, start=1):
-        status_placeholder.write(f"checking connection {index} of {total_connections}")
+        status_placeholder.markdown(f"**checking connection {index} of {total_connections}**")
         cars_url = build_cars_endpoint(connection, station_from, station_to)
         cars_result = send_query_get(cars_url)
         bike_cars = find_bike_cars(cars_result)
