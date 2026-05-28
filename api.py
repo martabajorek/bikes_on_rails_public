@@ -26,6 +26,8 @@ class PkpApiError(RuntimeError):
 
 
 def _read_response(response: httpx.Response) -> Any:
+    print(response.status_code)
+
     if response.status_code != 200:
         raise PkpApiError(
             response.status_code,
