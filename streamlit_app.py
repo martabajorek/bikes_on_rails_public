@@ -81,6 +81,23 @@ def build_seat_summaries(
     return seat_summaries
 
 
+def render_connection_status(
+    parsed_connections: dict[str, object],
+    status_placeholder: st.delta_generator.DeltaGenerator,
+    current_index: int,
+    total_connections: int,
+) -> None:
+    status_placeholder.markdown(
+        f"**checking connection {current_index} of {total_connections}**"
+    )
+    status_placeholder.write(
+        f"number of connections: {parsed_connections['number_of_connections']}"
+    )
+    status_placeholder.write(
+        f"number of bike trains: {parsed_connections['number_of_bike_trains']}"
+    )
+
+
 def render_seat_table(df: pd.DataFrame) -> str:
     rows = []
 
@@ -180,13 +197,15 @@ def main() -> None:
         st.write(
             f"number of bike trains: {parsed_connections['number_of_bike_trains']}"
         )
+        status_placeholder = st.empty()
+        total_connections = len(parsed_connections["bike_trains"][:3])
+        status_placeholder.markdown(f"**checking connection 1 of {total_connections}**")
         st.dataframe(
             pd.DataFrame(parsed_connections["bike_trains"]),
             use_container_width=True,
         )
 
     st.subheader("seats")
-    status_placeholder = st.empty()
     seat_summaries = build_seat_summaries(
         parsed_connections, station_from, station_to, status_placeholder
     )
