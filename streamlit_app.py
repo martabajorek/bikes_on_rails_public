@@ -1,5 +1,6 @@
 from datetime import date
 from pathlib import Path
+from html import escape
 
 import pandas as pd
 import streamlit as st
@@ -79,14 +80,49 @@ def build_seat_summaries(
     return seat_summaries
 
 
-def style_seat_summaries(df: pd.DataFrame) -> pd.io.formats.style.Styler:
-    def highlight_row(row: pd.Series) -> list[str]:
-        if row["summary"] == "brak wolnych miejsc na rower":
-            return [""] * len(row)
+def render_seat_table(df: pd.DataFrame) -> str:
+    rows = []
 
-        return ["background-color: #dff3df"] * len(row)
+    for _, row in df.iterrows():
+        is_available = row["summary"] != "brak wolnych miejsc na rower"
+        background = "background-color: #dff3df;" if is_available else ""
+        summary_html = escape(str(row["summary"])).replace("\n", "<br>")
 
-    return df.style.apply(highlight_row, axis=1)
+        rows.append(
+            "<tr style='{background}'>"
+            "<td>{nr}</td>"
+            "<td>{kat}</td>"
+            "<td>{wyj}</td>"
+            "<td>{przy}</td>"
+            "<td>{czas}</td>"
+            "<td>{summary}</td>"
+            "</tr>".format(
+                background=background,
+                nr=escape(str(row["nrPociagu"])),
+                kat=escape(str(row["kategoriaPociagu"])),
+                wyj=escape(str(row["dataWyjazdu"])),
+                przy=escape(str(row["dataPrzyjazdu"])),
+                czas=escape(str(row["czasJazdy"])),
+                summary=summary_html,
+            )
+        )
+
+    return (
+        "<table style='width:100%; border-collapse: collapse;'>"
+        "<thead>"
+        "<tr>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>nrPociagu</th>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>kategoriaPociagu</th>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>dataWyjazdu</th>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>dataPrzyjazdu</th>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>czasJazdy</th>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>summary</th>"
+        "</tr>"
+        "</thead>"
+        "<tbody>"
+        + "".join(rows)
+        + "</tbody></table>"
+    )
 
 
 def main() -> None:
@@ -147,7 +183,7 @@ def main() -> None:
         parsed_connections, station_from, station_to, status_placeholder
     )
     seat_df = pd.DataFrame(seat_summaries)
-    st.dataframe(style_seat_summaries(seat_df), use_container_width=True)
+    st.markdown(render_seat_table(seat_df), unsafe_allow_html=True)
     status_placeholder.empty()
 
 
