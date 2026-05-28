@@ -70,6 +70,7 @@ def build_seat_summaries(
             {
                 "nrPociagu": connection["nrPociagu"],
                 "kategoriaPociagu": connection["kategoriaPociagu"],
+                "nazwaPociagu": connection["nazwaPociagu"],
                 "dataWyjazdu": connection["dataWyjazdu"],
                 "dataPrzyjazdu": connection["dataPrzyjazdu"],
                 "czasJazdy": connection["czasJazdy"],
@@ -92,6 +93,7 @@ def render_seat_table(df: pd.DataFrame) -> str:
             "<tr style='{background}'>"
             "<td>{nr}</td>"
             "<td>{kat}</td>"
+            "<td>{name}</td>"
             "<td>{wyj}</td>"
             "<td>{przy}</td>"
             "<td>{czas}</td>"
@@ -100,6 +102,7 @@ def render_seat_table(df: pd.DataFrame) -> str:
                 background=background,
                 nr=escape(str(row["nrPociagu"])),
                 kat=escape(str(row["kategoriaPociagu"])),
+                name=escape(str(row["nazwaPociagu"])),
                 wyj=escape(str(row["dataWyjazdu"])),
                 przy=escape(str(row["dataPrzyjazdu"])),
                 czas=escape(str(row["czasJazdy"])),
@@ -113,6 +116,7 @@ def render_seat_table(df: pd.DataFrame) -> str:
         "<tr>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>nrPociagu</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>kategoriaPociagu</th>"
+        "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>nazwaPociagu</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>dataWyjazdu</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>dataPrzyjazdu</th>"
         "<th style='text-align:left; border-bottom:1px solid #ddd; padding:6px;'>czasJazdy</th>"
