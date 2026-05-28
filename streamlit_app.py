@@ -203,8 +203,10 @@ def main() -> None:
         status_placeholder = st.empty()
         total_connections = len(parsed_connections["bike_trains"][:3])
         status_placeholder.markdown(f"**checking connection 1 of {total_connections}**")
+        connections_df = pd.DataFrame(parsed_connections["bike_trains"])
+        connections_df.index = connections_df.index + 1
         st.dataframe(
-            pd.DataFrame(parsed_connections["bike_trains"]),
+            connections_df,
             use_container_width=True,
         )
 
