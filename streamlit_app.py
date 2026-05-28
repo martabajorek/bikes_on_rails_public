@@ -30,39 +30,49 @@ def station_label(station: dict[str, object]) -> str:
     return str(station["nazwa"])
 
 
-def build_seat_rows(
+def build_seat_summaries(
     parsed_connections: dict[str, object],
     station_from: dict[str, object],
     station_to: dict[str, object],
 ) -> list[dict[str, object]]:
-    seat_rows: list[dict[str, object]] = []
+    seat_summaries: list[dict[str, object]] = []
 
     for connection in parsed_connections["bike_trains"]:
         cars_url = build_cars_endpoint(connection, station_from, station_to)
         cars_result = send_query_get(cars_url)
         bike_cars = find_bike_cars(cars_result)
+        wagon_counts: dict[str, int] = {}
 
         for car in bike_cars:
             seats_url = build_seats_endpoint(connection, car, station_from, station_to)
             svg_text = send_query_get(seats_url)
             bike_places = extract_bike_places(svg_text)
 
-            for seat in bike_places:
-                seat_rows.append(
-                    {
-                        "dataWyjazdu": connection["dataWyjazdu"],
-                        "dataPrzyjazdu": connection["dataPrzyjazdu"],
-                        "kategoriaPociagu": connection["kategoriaPociagu"],
-                        "czasJazdy": connection["czasJazdy"],
-                        "nrPociagu": connection["nrPociagu"],
-                        "wagon": car["wagon"],
-                        "wagonySchemat": car["wagonySchemat"],
-                        "place_number": seat["place_number"],
-                        "status": seat["status"],
-                    }
+            if bike_places:
+                wagon_counts[car["wagon"]] = wagon_counts.get(car["wagon"], 0) + len(
+                    bike_places
                 )
 
-    return seat_rows
+        if wagon_counts:
+            summary_text = ", ".join(
+                f"{count} {'miejsce' if count == 1 else 'miejsca'} w wagonie {wagon}"
+                for wagon, count in sorted(wagon_counts.items())
+            )
+        else:
+            summary_text = "brak wolnych miejsc na rower"
+
+        seat_summaries.append(
+            {
+                "nrPociagu": connection["nrPociagu"],
+                "kategoriaPociagu": connection["kategoriaPociagu"],
+                "dataWyjazdu": connection["dataWyjazdu"],
+                "dataPrzyjazdu": connection["dataPrzyjazdu"],
+                "czasJazdy": connection["czasJazdy"],
+                "summary": summary_text,
+            }
+        )
+
+    return seat_summaries
 
 
 def main() -> None:
@@ -104,7 +114,7 @@ def main() -> None:
         json=build_connections_payload(select_date, station_from, station_to),
     )
     parsed_connections = parse_connections_result(connections_result)
-    seat_rows = build_seat_rows(parsed_connections, station_from, station_to)
+    seat_summaries = build_seat_summaries(parsed_connections, station_from, station_to)
 
     st.subheader("connections")
     st.write(f"number of connections: {parsed_connections['number_of_connections']}")
@@ -117,10 +127,7 @@ def main() -> None:
     )
 
     st.subheader("seats")
-    if seat_rows:
-        st.dataframe(pd.DataFrame(seat_rows), use_container_width=True)
-    else:
-        st.info("No bicycle seats found.")
+    st.dataframe(pd.DataFrame(seat_summaries), use_container_width=True)
 
 
 if __name__ == "__main__":
