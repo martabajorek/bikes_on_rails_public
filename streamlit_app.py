@@ -153,7 +153,7 @@ def main() -> None:
     stations = load_stations()
     options = station_options(stations)
 
-    _, controls_col, _ = st.columns([1, 2, 1])
+    controls_col, _ = st.columns([2, 5])
     with controls_col:
         station_from = st.selectbox(
             "station_from",
