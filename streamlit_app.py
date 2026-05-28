@@ -171,15 +171,19 @@ def main() -> None:
     )
     parsed_connections = parse_connections_result(connections_result)
 
-    st.subheader("connections")
-    st.write(f"number of connections: {parsed_connections['number_of_connections']}")
-    st.write(
-        f"number of bike trains: {parsed_connections['number_of_bike_trains']}"
-    )
-    st.dataframe(
-        pd.DataFrame(parsed_connections["bike_trains"]),
-        use_container_width=True,
-    )
+    connections_placeholder = st.empty()
+    with connections_placeholder.container():
+        st.subheader("connections")
+        st.write(
+            f"number of connections: {parsed_connections['number_of_connections']}"
+        )
+        st.write(
+            f"number of bike trains: {parsed_connections['number_of_bike_trains']}"
+        )
+        st.dataframe(
+            pd.DataFrame(parsed_connections["bike_trains"]),
+            use_container_width=True,
+        )
 
     st.subheader("seats")
     status_placeholder = st.empty()
@@ -189,6 +193,7 @@ def main() -> None:
     seat_df = pd.DataFrame(seat_summaries)
     st.markdown(render_seat_table(seat_df), unsafe_allow_html=True)
     status_placeholder.empty()
+    connections_placeholder.empty()
 
 
 if __name__ == "__main__":
