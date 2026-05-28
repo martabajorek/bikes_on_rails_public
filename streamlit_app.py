@@ -90,33 +90,35 @@ def style_seat_summaries(df: pd.DataFrame) -> pd.io.formats.style.Styler:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Bikes On Rails", layout="centered")
+    st.set_page_config(page_title="Bikes On Rails", layout="wide")
     st.title("Bikes On Rails")
 
     stations = load_stations()
     options = station_options(stations)
 
-    station_from = st.selectbox(
-        "station_from",
-        options,
-        format_func=station_label,
-        index=None,
-        placeholder="Select station",
-    )
+    _, controls_col, _ = st.columns([1, 2, 1])
+    with controls_col:
+        station_from = st.selectbox(
+            "station_from",
+            options,
+            format_func=station_label,
+            index=None,
+            placeholder="Select station",
+        )
 
-    station_to = st.selectbox(
-        "station_to",
-        options,
-        format_func=station_label,
-        index=None,
-        placeholder="Select station",
-    )
+        station_to = st.selectbox(
+            "station_to",
+            options,
+            format_func=station_label,
+            index=None,
+            placeholder="Select station",
+        )
 
-    select_date = st.date_input(
-        "select_date",
-        value=date.today(),
-        min_value=date.today(),
-    )
+        select_date = st.date_input(
+            "select_date",
+            value=date.today(),
+            min_value=date.today(),
+        )
 
     run_clicked = st.button("Run")
 
