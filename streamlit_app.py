@@ -75,6 +75,16 @@ def build_seat_summaries(
     return seat_summaries
 
 
+def style_seat_summaries(df: pd.DataFrame) -> pd.io.formats.style.Styler:
+    def highlight_row(row: pd.Series) -> list[str]:
+        if row["summary"] == "brak wolnych miejsc na rower":
+            return [""] * len(row)
+
+        return ["background-color: #dff3df"] * len(row)
+
+    return df.style.apply(highlight_row, axis=1)
+
+
 def main() -> None:
     st.set_page_config(page_title="Bikes On Rails", layout="centered")
     st.title("Bikes On Rails")
@@ -127,7 +137,8 @@ def main() -> None:
     )
 
     st.subheader("seats")
-    st.dataframe(pd.DataFrame(seat_summaries), use_container_width=True)
+    seat_df = pd.DataFrame(seat_summaries)
+    st.dataframe(style_seat_summaries(seat_df), use_container_width=True)
 
 
 if __name__ == "__main__":
