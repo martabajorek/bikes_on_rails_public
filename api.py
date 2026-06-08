@@ -17,29 +17,38 @@ HEADERS = {
 }
 
 
-def send_query_get(endpoint) -> Any:
+class PkpApiError(RuntimeError):
+    def __init__(self, status_code: int, status_message: str, body: str = "") -> None:
+        super().__init__(f"{status_code} {status_message}")
+        self.status_code = status_code
+        self.status_message = status_message
+        self.body = body
 
+
+def _read_response(response: httpx.Response) -> Any:
+    if response.status_code != 200:
+        raise PkpApiError(
+            response.status_code,
+            response.reason_phrase,
+            response.text,
+        )
+
+    try:
+        return response.json()
+    except json.JSONDecodeError:
+        print("returning text")
+        return response.text
+
+
+def send_query_get(endpoint) -> Any:
     with httpx.Client(http2=True, headers=HEADERS, timeout=30) as client:
         response = client.get(url=endpoint)
-        response.raise_for_status()
-
-        try:
-            return response.json()
-        except json.JSONDecodeError:
-            print('returning text')
-            return response.text
+        return _read_response(response)
 
 def send_query_post(endpoint, json=None) -> Any:
-
     with httpx.Client(http2=True, headers=HEADERS, timeout=30) as client:
         response = client.post(url=endpoint, json=json)
-        response.raise_for_status()
-
-        try:
-            return response.json()
-        except json.JSONDecodeError:
-            print('returning text')
-            return response.text
+        return _read_response(response)
 
     # headers = {
     #     "User-Agent": (
