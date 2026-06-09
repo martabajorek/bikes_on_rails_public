@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-import httpx
+from curl_cffi import requests
 
 
 HEADERS = {
@@ -47,15 +47,24 @@ def _read_response(response: httpx.Response) -> Any:
 
 def send_query_get(endpoint) -> Any:
     print(endpoint)
-    with httpx.Client(http2=True, headers=HEADERS, timeout=30) as client:
-        response = client.get(url=endpoint)
-        return _read_response(response)
+    response = requests.get(
+        url=endpoint,
+        headers=HEADERS,
+        timeout=30,
+        impersonate="chrome"
+    )
+    return _read_response(response)
 
 def send_query_post(endpoint, json=None) -> Any:
     print(json)
-    with httpx.Client(http2=True, headers=HEADERS, timeout=30) as client:
-        response = client.post(url=endpoint, json=json)
-        return _read_response(response)
+    response = requests.post(
+        url=endpoint,
+        json=json,
+        headers=HEADERS,
+        timeout=30,
+        impersonate="chrome"
+    )
+    return _read_response(response)
 
     # headers = {
     #     "User-Agent": (
